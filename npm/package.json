@@ -1,5 +1,6 @@
 {
   "name": "npm",
+  "type": "module",
   "version": "1.0.0",
   "description": "belajar npm nodejs",
   "main": "app.js",
@@ -10,6 +11,7 @@
   "author": "Alfius Stevanus",
   "license": "ISC",
   "dependencies": {
+    "chalk": "^5.2.0",
     "validator": "^13.9.0"
   }
 }
