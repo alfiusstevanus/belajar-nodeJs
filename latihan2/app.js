@@ -1,5 +1,5 @@
 const yargs = require('yargs')
-const { simpanContact } = require('./contacts')
+const { simpanContact, listContact, detailContact, deleteContact } = require('./contacts')
 //core modules
 // const { rejects } = require('assert')
 // const { resolve } = require('path')
@@ -29,38 +29,52 @@ yargs.command({
         }
     },
     handler(argv){
-        const contact = {
-            nama: argv.nama,
-            email: argv.email,
-            noHP: argv.noHP
-        }
     simpanContact(argv.nama, argv.email, argv.noHP)
     }
 })
+.demandCommand()
+
+//menampilkan daftar nama kontak beserta no HP
+yargs.command({
+    command: 'list',
+    describe: 'menampilkan daftar nama kontak beserta no HP',
+    handler(){
+        listContact()
+    }
+})
+
+//menampilkan detail kontak
+yargs.command({
+    command: 'detail',
+    describe: 'menampilkan detail sebuah kontak',
+    builder: {
+        nama: {
+            describe: 'Nama Lengkap',
+            demanOption: true,
+            type: 'string'
+        },
+    },
+    handler(argv){
+        detailContact(argv.nama)
+    }
+    
+})
+
+//menghapus kontak kontak berdasarkan nama
+yargs.command({
+    command: 'delete',
+    describe: 'menghapus kontak kontak berdasarkan nama',
+    builder: {
+        nama: {
+            describe: 'Nama Lengkap',
+            demanOption: true,
+            type: 'string'
+        },
+    },
+    handler(argv){
+        deleteContact(argv.nama)
+    }
+    
+})
 
 yargs.parse()
-// const {tulisPertanyaan, simpanContact} = require('./contacts')
-// const main = async ()=>{
-//     const nama = await tulisPertanyaan('Masukan nama Anda: ')
-//     const email = await tulisPertanyaan('Masukan Email Anda: ')
-//     const noHP = await tulisPertanyaan('Masukan nomor HP Anda: ')
-//     simpanContact(nama, email, noHP)
-// }
-// main()
-
-
-// rl.question('Masukan nama Anda: ', (nama) => {
-//     rl.question('Masukan no HP: ', (noHP) => {
-//         const contact = { nama, noHP }
-//         const file = fs.readFileSync('data/contacts.json', 'utf-8') //berupa string
-//         const contacts = JSON.parse(file) //string menjadi json
-
-//         contacts.push(contact) //berbentuk json
-
-//         fs.writeFileSync('data/contacts.json', JSON.stringify(contacts, null, 4)) // json menjadi string
-
-//         console.log('Terimakasih sudah memasukkan data')
-
-//         rl.close()
-//     })
-// })
