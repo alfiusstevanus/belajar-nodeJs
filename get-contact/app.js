@@ -2,7 +2,10 @@ const express = require('express')
 const expressLayouts = require('express-ejs-layouts')
 const app = express()
 const port = 3000
-const {loadContact, findContact} = require('./utils/contacts')
+const {loadContact, findContact, addContact, cekDuplikat, deleteContact, updateContacts} = require('./utils/contacts')
+const {body, validationResult, check} = require('express-validator')
+
+app.use(express.urlencoded({extended:true}))
 
 
 //gunakan ejs
@@ -12,6 +15,9 @@ app.use(expressLayouts)
 
 //build middleware untuk bisa akses folfer public
 app.use(express.static('public'))
+
+// middleware merubah data di body post menjadi data baru yang bisa dibaca
+app.use(express.urlencoded())
 
 
 
@@ -53,6 +59,99 @@ app.get('/contact', (req, res) => {
     })
 })
 
+
+// form tambah data kontak
+app.get('/contact/add', (req, res) => {
+    res.render('add-contact',{
+        title: 'Tambah Kontak',
+        layout: 'layouts/main.ejs'
+    })
+})
+
+
+// memproses data kontak baru
+app.post('/contact', [
+    body('nama').custom((value) => {
+        const duplikat = cekDuplikat(value)
+        if(duplikat){
+            throw new Error('Nama sudah digunakan!')
+        }
+        return true
+    }),
+    check('email','Email tidak valid! ').isEmail(),
+    check('noHP','No HP tidak valid!').isMobilePhone('id-ID'),
+
+], (req,res) => {
+    const errrors = validationResult(req)
+
+    if(!errrors.isEmpty()){
+        // return res.status(400).json({errors: errrors.array()})
+        res.render('add-contact',{
+            title: 'Tambah Kontak',
+            layout: 'layouts/main.ejs',
+            errors: errrors.array()
+        })
+    } else{
+        addContact(req.body)
+        res.redirect('/contact') // ini otomatis pake method get
+    }
+})
+
+// menghapus kontak 
+app.get('/contact/delete/:nama', (req, res) => {
+    const contact = findContact(req.params.nama)
+    
+    if(!contact){
+        res.status(404)
+        res.send('<h1>404</h1>')
+    } else {
+        deleteContact(req.params.nama)
+        res.redirect('/contact')
+    }
+})
+
+// form edit data kontak
+app.get('/contact/edit/:nama', (req, res) => {
+    const contact = findContact(req.params.nama)
+    res.render('edit-contact',{
+        title: 'Edit Kontak',
+        layout: 'layouts/main.ejs',
+        contact
+    })
+})
+
+// memproses ubah data kontak 
+app.post('/contact/update', [
+    body('nama').custom((value, {req}) => {
+        const duplikat = cekDuplikat(value)
+        if(value !== req.body.oldNama && duplikat){
+            throw new Error('Nama sudah digunakan!')
+        }
+        return true
+    }),
+    check('email','Email tidak valid! ').isEmail(),
+    check('noHP','No HP tidak valid!').isMobilePhone('id-ID'),
+
+], (req,res) => {
+    const errrors = validationResult(req)
+
+    if(!errrors.isEmpty()){
+        // return res.status(400).json({errors: errrors.array()})
+        res.render('edit-contact',{
+            title: 'Edit Kontak',
+            layout: 'layouts/main.ejs',
+            errors: errrors.array(),
+            contact: req.body,
+        })
+    } else{
+        updateContacts(req.body)
+        res.redirect('/contact') // ini otomatis pake method get
+    }
+})
+
+
+
+// halaman detail kontak
 app.get('/contact/:nama', (req, res) => {
     const contact = findContact(req.params.nama)
     res.render('detail',{
