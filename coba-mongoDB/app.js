@@ -1,165 +1,84 @@
-const { MongoClient } = require("mongodb");
-const uri = "mongodb://127.0.0.1:27017";
-const client = new MongoClient(uri);
+const express = require('express')
+const expressLayouts = require('express-ejs-layouts')
 
-// menampilkan 1 data
-// async function run() {
-// try {
-//     const database = client.db("belajar-mongo");
-//     const mahasiswa = database.collection("mahasiswa");
+require('./utils/db')
+const Contact = require('./model/contact')
 
-//     // Query for a movie that has the name 'alfius'
-//     const query = { nama: "alfius" };
+const app = express()
+const port = 3000
 
-//     // const options = {
-//     //   // sort matched documents in descending order by rating
-//     // sort: { "imdb.rating": -1 },
-//     //   // Include only the `title` and `imdb` fields in the returned document
-//     // projection: { _id: 0, title: 1, imdb: 1 },
-//     // };
-//     const mahaiswa = await mahasiswa.findOne(query);
-//     // since this method returns the matched document, not a cursor, print it directly
-//     console.log(mahaiswa);
-//     } finally {
-//     await client.close();
-//     }
-// }
-// run().catch(console.dir);
+//gunakan ejs
+app.set('view engine','ejs')
 
+app.use(expressLayouts)
 
-// menampilkan banyak data 
-// async function run() {
-// try {
-//     const database = client.db("belajar-mongo");
-//     const mahasiswa = database.collection("mahasiswa");
+//build middleware untuk bisa akses folfer public
+app.use(express.static('public'))
 
-    // query for mahasiswa that have a runtime less than 15 minutes
-    // const query = { nama: 'alfius'}
+// middleware merubah data di body post menjadi data baru yang bisa dibaca
+app.use(express.urlencoded())
 
-    // const options = {
-    //   // sort returned documents in ascending order by title (A->Z)
-    // sort: { title: 1 },
-    //   // Include only the `title` and `imdb` fields in each returned document
-    // projection: { _id: 0, title: 1, imdb: 1 },
-    // };
+//halaman home
+app.get('/', (req, res) => {
+    // res.sendFile('./index.html', {root: __dirname})
+    const mahasiswa = [
+        {
+        nama: 'akfius',
+        nrp: '161214',
+        hobi: 'makna'
+        },
+        {
+            nama: 'tumpal',
+            nrp: '16121312214',
+            hobi: 'tidur'
+        }
+    ]
+    res.render('index',{
+        nama: 'alfius',
+        title: 'Homepage',
+        mahasiswa,
+        layout: 'layouts/main.ejs'
+    })
+})
 
-//     const cursor = mahasiswa.find(query);
-
-//     // print a message if no documents were found
-//     if ((await mahasiswa.countDocuments(query)) === 0) {
-//     console.log("Data tidak ditemukan!");
-//     }
-
-//     for await (const doc of cursor) {
-//     console.dir(doc);
-//     }
-
-//     } finally {
-//     await client.close();
-//     }
-// }
-// run().catch(console.dir);
+// halaman about
+app.get('/about', (req, res) => {
+    res.render('about',{
+        title: 'Halaman about',
+        layout: 'layouts/main.ejs'
+    })
+})
 
 
+// halaman kontak
+app.get('/contact', async (req, res) => {
+    const contacts = await Contact.find()
+    res.render('contact',{
+        title: 'Halaman contact',
+        layout: 'layouts/main.ejs',
+        contacts
+    })
+})
 
 
-
-// menambahkan 1 data
-// async function run() {
-// try {
-//     const database = client.db("belajar-mongo");
-//     const mahasiswa = database.collection("mahasiswa");
-//     // create a document to insert
-//     const data = {
-//     nama: "alfius",
-//     email: "alfius@gmail.com",
-//     }
+// halaman detail kontak
+app.get('/contact/:nama', async (req, res) => {
+    // const contact = findContact(req.params.nama)
+    const contact = await Contact.findOne({nama: req.params.nama}) // promise
+    res.render('detail',{
+        title: 'Detail Contact',
+        layout: 'layouts/main.ejs',
+        contact
+    })
+})
 
 
 
-//     const result = await mahasiswa.insertOne(data);
-
-//     console.log(`Data berhasil ditambahkan kedatabase dengan ID: ${result.insertedId}`);
-// } finally {
-//     await client.close();
-// }
-// }
-// run().catch(console.dir);
-
-
-// menambahkan banyak data
-// async function run() {
-//     try {
-//         const database = client.db("belajar-mongo");
-//         const mahasiswa = database.collection("mahasiswa");
-//         // create a document to insert
-//         const datas = [
-//         {
-//             nama: "alfius",
-//             email: "alfius@gmail.com",
-//         },
-//         {
-//             nama: "tumpal",
-//             email: "tumpal@gmail.com",
-//         }
-//     ]
-//         // const options = { ordered: true };
-//         const result = await mahasiswa.insertMany(datas);
-    
-//         console.log(`${result.insertedCount} Data berhasil ditambahkan ke database.`);
-//     } finally {
-//         await client.close();
-//     }
-//     }
-//     run().catch(console.dir);
 
 
 
-// update data
-// async function run() {
-// try {
-//     const database = client.db("belajar-mongo");
-//     const mahasiswa = database.collection("mahasiswa");
-
-//     // create a filter for a movie to update
-//     const filter = { nama: "stevanus" };
-
-//     // this option instructs the method to create a document if no documents match the filter
-//     // const options = { upsert: true };
-
-//     // create a document that sets the plot of the movie
-//     const updateDoc = {
-//     $set: {
-//         email: `stevanus@school.ac.id`
-//     },
-// };
-//     const result = await mahasiswa.updateOne(filter, updateDoc); //kalo mau langsung banyak pake updateMany()
-//     console.log(
-//         `${result.matchedCount} data didapat, berhasil update ${result.modifiedCount} data`,
-//     );
-//     } finally {
-//     await client.close();
-//     }
-// }
-// run().catch(console.dir);
 
 
-// menghapus sebuah data
-async function run() {
-try {
-    const database = client.db("belajar-mongo");
-    const mahasiswa = database.collection("mahasiswa");
-
-    const query = { nama: "alfius" };
-
-    const result = await mahasiswa.deleteOne(query); //deleteMany() jika ingin banyak data yang dihapus
-    if (result.deletedCount === 1) {
-    console.log(`Data tersebut berhasil dihapus`);
-    } else {
-    console.log("Gagal! Tidak ada data yang berhasil dihapus!");
-    }
-    } finally {
-    await client.close();
-    }
-}
-run().catch(console.dir);
+app.listen(port, () => {
+    console.log(`App listening on port ${port}`)
+})
