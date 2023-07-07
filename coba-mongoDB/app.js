@@ -5,26 +5,26 @@ const uri = "mongodb://127.0.0.1:27017";
 
 const client = new MongoClient(uri);
 
+
+//menambahkan 1 data
 async function run() {
 try {
     const db = client.db('belajar-mongo');
     const data = {
-        nama: 'agus',
-        email: 'agus@gmail.com'
+        nama: 'rahma',
+        email: 'rahma@gmail.com'
     }
     //query menambahkan 1 data
-    db.collection('nama').insertOne(
-        data,
-        (error,result) => {
-            if(error){
-                return console.log('gagal menambahkan data!')
-            }
-            console.log(result.ops)
-        }
-    )
+    await db.collection('nama').insertOne(data)
+    console.log('Data berhasil masuk ke DataBase!')
 } finally {
     // Ensures that the client will close when you finish/error
     await client.close();
     }
 }
-run().catch(console.dir);
+run();
+
+
+
+
+db.collection('nama')
