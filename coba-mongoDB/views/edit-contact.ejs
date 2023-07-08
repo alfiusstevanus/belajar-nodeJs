@@ -13,7 +13,8 @@
             </div>
             <% } %>
             <!-- end error -->
-            <form method="post" action="/contact/update">
+            <form method="post" action="/contact?_method=PUT">
+                <input type="hidden" value="<%= contact._id %>" name="_id">
                 <input type="hidden" class="form-control" id="nama" name="oldNama" required
                     value="<%= contact.oldNama || contact.nama%>">
                 <div class="mb-3">

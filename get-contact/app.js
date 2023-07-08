@@ -69,7 +69,7 @@ app.get('/contact/add', (req, res) => {
 })
 
 
-// memproses data kontak baru
+// memproses tambah data kontak baru
 app.post('/contact', [
     body('nama').custom((value) => {
         const duplikat = cekDuplikat(value)
